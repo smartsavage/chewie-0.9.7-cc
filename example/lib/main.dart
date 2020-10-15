@@ -31,14 +31,15 @@ class _ChewieDemoState extends State<ChewieDemo> {
   void initState() {
     super.initState();
     _videoPlayerController1 = VideoPlayerController.network(
-        'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4');
+        'https://parlvulive-dt.azureedge.net/HOC230-X-1/Test/VL/EN/Playlist.m3u8?DVR');
     _videoPlayerController2 = VideoPlayerController.network(
-        'https://www.sample-videos.com/video123/mp4/480/asdasdas.mp4');
+        'https://parlvuvod-dt.azureedge.net/pvvod-en/_definst_/mp4:azr/2020/2020-10-14/42953_HoC%20Sitting%20No.%2013_13-54-32_VL.mp4/playlist.m3u8?audioindex=1&wowzalanguage=eng');
     _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController1,
       aspectRatio: 3 / 2,
       autoPlay: true,
       looping: true,
+      isDVR:true,
       // Try playing around with some of these other options:
 
       // showControls: false,
@@ -103,11 +104,12 @@ class _ChewieDemoState extends State<ChewieDemo> {
                           aspectRatio: 3 / 2,
                           autoPlay: true,
                           looping: true,
+                          isDVR:true,
                         );
                       });
                     },
                     child: Padding(
-                      child: Text("Video 1"),
+                      child: Text("DVR"),
                       padding: EdgeInsets.symmetric(vertical: 16.0),
                     ),
                   ),
@@ -124,12 +126,14 @@ class _ChewieDemoState extends State<ChewieDemo> {
                           aspectRatio: 3 / 2,
                           autoPlay: true,
                           looping: true,
+                          isDVR: false,
+                          startTime: DateTime(2020,10,14,13,54,31 ),
                         );
                       });
                     },
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: Text("Error Video"),
+                      child: Text("VOD"),
                     ),
                   ),
                 )

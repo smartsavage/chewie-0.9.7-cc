@@ -184,8 +184,10 @@ class ChewieController extends ChangeNotifier {
     this.errorBuilder,
     this.allowedScreenSleep = true,
     this.isLive = false,
+    this.isDVR = false,
     this.allowFullScreen = true,
     this.allowMuting = true,
+    this.startTime = null,
     this.systemOverlaysAfterFullScreen = SystemUiOverlay.values,
     this.deviceOrientationsAfterFullScreen = const [
       DeviceOrientation.portraitUp,
@@ -258,11 +260,17 @@ class ChewieController extends ChangeNotifier {
   /// Defines if the controls should be for live stream video
   final bool isLive;
 
+  /// Defines if the controls should be for DVR stream video
+  final bool isDVR;
+
   /// Defines if the fullscreen control should be shown
   final bool allowFullScreen;
 
   /// Defines if the mute control should be shown
   final bool allowMuting;
+
+  /// Defines the start time of VOD meeting
+  final DateTime startTime;
 
   /// Defines the system overlays visible after exiting fullscreen
   final List<SystemUiOverlay> systemOverlaysAfterFullScreen;

@@ -309,13 +309,34 @@ class _CupertinoControlsState extends State<CupertinoControls> {
   }
 
   Widget _buildPosition(Color iconColor) {
-    final position =
-        _latestValue != null ? _latestValue.position : Duration(seconds: 0);
+    var strTime = "";
+    if (chewieController.isDVR){
+      strTime = _latestValue != null && _latestValue.metadata != null && _latestValue.metadata != ""
+        ? _latestValue.metadata.substring(11, 19) 
+        : "";
+    }
+    else if (chewieController.startTime != null)
+    {
+      final position = _latestValue != null && _latestValue.position != null
+          ? _latestValue.position
+          : Duration.zero;
+      final currentTime = chewieController.startTime.add(position);
+      strTime ="${currentTime.hour.toString().padLeft(2,'0')}:${currentTime.minute.toString().padLeft(2,'0')}:${currentTime.second.toString().padLeft(2,'0')}";
+    }
+    else{
+      final position = _latestValue != null && _latestValue.position != null
+          ? _latestValue.position
+          : Duration.zero;
+      final duration = _latestValue != null && _latestValue.duration != null
+          ? _latestValue.duration
+          : Duration.zero;
+      strTime = "${formatDuration(position)} / ${formatDuration(duration)}";
 
+    }
     return Padding(
       padding: EdgeInsets.only(right: 12.0),
       child: Text(
-        formatDuration(position),
+        strTime,
         style: TextStyle(
           color: iconColor,
           fontSize: 12.0,

@@ -144,7 +144,8 @@ class _MaterialControlsState extends State<MaterialControls> {
             chewieController.allowMuting
                 ? _buildMuteButton(controller)
                 : Container(),
-            if (controller.subtitleSource != null || controller.value.subtitleList.length >0 )_buildCCButton(chewieController),
+            //if (controller.subtitleSource != null || controller.value.subtitleList.length >0 )_buildCCButton(chewieController),
+            _buildCCButton(chewieController),
             chewieController.allowFullScreen
                 ? _buildExpandButton()
                 : Container(),
@@ -262,21 +263,14 @@ class _MaterialControlsState extends State<MaterialControls> {
       onTap: () {
         _cancelAndRestartTimer();
         chewieController.showSubtitle = !chewieController.showSubtitle;
-        if (!controller.value.subtitleList.isEmpty && chewieController.showSubtitle == true) {
+        /*if (!controller.value.subtitleList.isEmpty && chewieController.showSubtitle == true) {
           if (controller.value.subtitleList.length == 1) {
             controller.setSubtitles(
                 controller.value.subtitleList[0].trackIndex,
                 controller.value.subtitleList[0].groupIndex
             );
           }
-          else {
-          Navigator.of(context)
-              .push(new MaterialPageRoute(
-            builder: (BuildContext context) => SubtitlePicker(controller),
-            fullscreenDialog: true,
-          ));
-          }
-        }
+        }*/
       },
       child: AnimatedOpacity(
         opacity: _hideStuff ? 0.0 : 1.0,
@@ -319,17 +313,35 @@ class _MaterialControlsState extends State<MaterialControls> {
   }
 
   Widget _buildPosition(Color iconColor) {
-    final position = _latestValue != null && _latestValue.position != null
-        ? _latestValue.position
-        : Duration.zero;
-    final duration = _latestValue != null && _latestValue.duration != null
-        ? _latestValue.duration
-        : Duration.zero;
+    var strTime = "";
+    if (chewieController.isDVR){
+      strTime = _latestValue != null && _latestValue.metadata != null && _latestValue.metadata != ""
+        ? _latestValue.metadata.substring(11, 19) 
+        : "";
+    }
+    else if (chewieController.startTime != null)
+    {
+      final position = _latestValue != null && _latestValue.position != null
+          ? _latestValue.position
+          : Duration.zero;
+      final currentTime = chewieController.startTime.add(position);
+      strTime ="${currentTime.hour.toString().padLeft(2,'0')}:${currentTime.minute.toString().padLeft(2,'0')}:${currentTime.second.toString().padLeft(2,'0')}";
+    }
+    else{
+      final position = _latestValue != null && _latestValue.position != null
+          ? _latestValue.position
+          : Duration.zero;
+      final duration = _latestValue != null && _latestValue.duration != null
+          ? _latestValue.duration
+          : Duration.zero;
+      strTime = "${formatDuration(position)} / ${formatDuration(duration)}";
 
+    }
+    
     return Padding(
       padding: EdgeInsets.only(right: 24.0),
       child: Text(
-        '${formatDuration(position)} / ${formatDuration(duration)}',
+        strTime,
         style: TextStyle(
           fontSize: 14.0,
         ),
@@ -442,54 +454,4 @@ class _MaterialControlsState extends State<MaterialControls> {
   }
 }
 
-class SubtitlePicker extends StatefulWidget {
 
-  final VideoPlayerController controller;
-
-  SubtitlePicker(this.controller);
-
-  @override
-  _SubtitlePickerState createState() => _SubtitlePickerState();
-
-}
-
-class _SubtitlePickerState extends State<SubtitlePicker> {
-
-  VideoPlayerController controller;
-  List<Subtitle> subtitleList;
-
-  void initState() {
-    super.initState();
-    controller = widget.controller;
-    subtitleList = widget.controller.value.subtitleList;
-  }
-
-
-
-  Widget _buildListViewItem(BuildContext context, int index) {
-    Subtitle subtitle = subtitleList[index];
-    return ListTile(
-      title: Text(subtitle.label),
-      onTap: () {
-        if (subtitle.groupIndex != null && subtitle.trackIndex != null){
-          controller.setSubtitles(subtitle.trackIndex, subtitle.groupIndex);
-        }
-          Navigator.of(context).pop();
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Veldu texta'),
-      ),
-      body: ListView.builder(
-        key: Key('subtitle-list'),
-        itemBuilder: _buildListViewItem,
-        itemCount: subtitleList.length,
-      ),
-    );
-  }
-}
