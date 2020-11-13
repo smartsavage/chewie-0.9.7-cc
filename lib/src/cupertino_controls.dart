@@ -34,6 +34,7 @@ class _CupertinoControlsState extends State<CupertinoControls> {
   final marginSize = 5.0;
   Timer _expandCollapseTimer;
   Timer _initTimer;
+  String subtitle = "";
 
   VideoPlayerController controller;
   ChewieController chewieController;
@@ -41,6 +42,12 @@ class _CupertinoControlsState extends State<CupertinoControls> {
   @override
   Widget build(BuildContext context) {
     chewieController = ChewieController.of(context);
+    if (chewieController.showSubtitle) {
+      String newSubtitle = controller.value.subtitle;
+      if (subtitle != newSubtitle) {
+        subtitle = newSubtitle;
+      }
+    }
 
     if (_latestValue.hasError) {
       return chewieController.errorBuilder != null
@@ -75,6 +82,21 @@ class _CupertinoControlsState extends State<CupertinoControls> {
           children: <Widget>[
             _buildTopBar(backgroundColor, iconColor, barHeight, buttonPadding),
             _buildHitArea(),
+            chewieController.showSubtitle && this.subtitle != ""
+                ? Container(
+                    padding:
+                        EdgeInsets.only(bottom: 2.0, left: 2.0, right: 2.0),
+                    margin: EdgeInsets.only(bottom: 12.0),
+                    color: Colors.black.withOpacity(0.7),
+                    child: Text(
+                      this.subtitle,
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ))
+                : Container(),
             _buildBottomBar(backgroundColor, iconColor, barHeight),
           ],
         ),
@@ -139,12 +161,14 @@ class _CupertinoControlsState extends State<CupertinoControls> {
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
+                        _buildCCButton(chewieController, barHeight),
                         _buildPlayPause(controller, iconColor, barHeight),
                         _buildLive(iconColor),
                       ],
                     )
                   : Row(
                       children: <Widget>[
+                        _buildCCButton(chewieController, barHeight),
                         _buildSkipBack(iconColor, barHeight),
                         _buildPlayPause(controller, iconColor, barHeight),
                         _buildSkipForward(iconColor, barHeight),
@@ -310,20 +334,20 @@ class _CupertinoControlsState extends State<CupertinoControls> {
 
   Widget _buildPosition(Color iconColor) {
     var strTime = "";
-    if (chewieController.isDVR){
-      strTime = _latestValue != null && _latestValue.metadata != null && _latestValue.metadata != ""
-        ? _latestValue.metadata.substring(11, 19) 
-        : "";
-    }
-    else if (chewieController.startTime != null)
-    {
+    if (chewieController.isDVR) {
+      strTime = _latestValue != null &&
+              _latestValue.metadata != null &&
+              _latestValue.metadata != ""
+          ? _latestValue.metadata.substring(11, 19)
+          : "";
+    } else if (chewieController.startTime != null) {
       final position = _latestValue != null && _latestValue.position != null
           ? _latestValue.position
           : Duration.zero;
       final currentTime = chewieController.startTime.add(position);
-      strTime ="${currentTime.hour.toString().padLeft(2,'0')}:${currentTime.minute.toString().padLeft(2,'0')}:${currentTime.second.toString().padLeft(2,'0')}";
-    }
-    else{
+      strTime =
+          "${currentTime.hour.toString().padLeft(2, '0')}:${currentTime.minute.toString().padLeft(2, '0')}:${currentTime.second.toString().padLeft(2, '0')}";
+    } else {
       final position = _latestValue != null && _latestValue.position != null
           ? _latestValue.position
           : Duration.zero;
@@ -331,7 +355,6 @@ class _CupertinoControlsState extends State<CupertinoControls> {
           ? _latestValue.duration
           : Duration.zero;
       strTime = "${formatDuration(position)} / ${formatDuration(duration)}";
-
     }
     return Padding(
       padding: EdgeInsets.only(right: 12.0),
@@ -432,6 +455,44 @@ class _CupertinoControlsState extends State<CupertinoControls> {
                   barHeight, buttonPadding)
               : Container(),
         ],
+      ),
+    );
+  }
+
+  GestureDetector _buildCCButton(
+      ChewieController chewieController, double barHeight) {
+    return GestureDetector(
+      onTap: () {
+        _cancelAndRestartTimer();
+        chewieController.showSubtitle = !chewieController.showSubtitle;
+        /*if (!controller.value.subtitleList.isEmpty && chewieController.showSubtitle == true) {
+          if (controller.value.subtitleList.length == 1) {
+            controller.setSubtitles(
+                controller.value.subtitleList[0].trackIndex,
+                controller.value.subtitleList[0].groupIndex
+            );
+          }
+        }*/
+      },
+      child: AnimatedOpacity(
+        opacity: _hideStuff ? 0.0 : 1.0,
+        duration: Duration(milliseconds: 300),
+        child: ClipRect(
+          child: Container(
+            child: Container(
+              height: barHeight,
+              padding: EdgeInsets.only(
+                left: 8.0,
+                right: 8.0,
+              ),
+              child: Icon(
+                Icons.closed_caption,
+                color:
+                    chewieController.showSubtitle ? Colors.blue : Colors.grey,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
