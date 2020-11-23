@@ -2,9 +2,11 @@ import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:video_player/video_player.dart';
+import 'package:chewie/src/chewie_player.dart';
 
 class CupertinoVideoProgressBar extends StatefulWidget {
   CupertinoVideoProgressBar(
+    this.chewieController,
     this.controller, {
     ChewieProgressColors colors,
     this.onDragEnd,
@@ -13,6 +15,7 @@ class CupertinoVideoProgressBar extends StatefulWidget {
   }) : colors = colors ?? ChewieProgressColors();
 
   final VideoPlayerController controller;
+  final ChewieController chewieController;
   final ChewieProgressColors colors;
   final Function() onDragStart;
   final Function() onDragEnd;
@@ -54,7 +57,11 @@ class _VideoProgressBarState extends State<CupertinoVideoProgressBar> {
       final box = context.findRenderObject() as RenderBox;
       final Offset tapPos = box.globalToLocal(globalPosition);
       final double relative = tapPos.dx / box.size.width;
-      final Duration position = controller.value.duration * relative;
+      int barDuration = controller.value.duration.inMilliseconds -
+          widget.chewieController.startPosition * 1000;
+      int barPosition = (barDuration * relative).round() +
+          widget.chewieController.startPosition * 1000;
+      final Duration position = Duration(milliseconds: barPosition);
       controller.seekTo(position);
     }
 
@@ -66,6 +73,7 @@ class _VideoProgressBarState extends State<CupertinoVideoProgressBar> {
           color: Colors.transparent,
           child: CustomPaint(
             painter: _ProgressBarPainter(
+              widget.chewieController,
               controller.value,
               widget.colors,
             ),
@@ -115,8 +123,8 @@ class _VideoProgressBarState extends State<CupertinoVideoProgressBar> {
 }
 
 class _ProgressBarPainter extends CustomPainter {
-  _ProgressBarPainter(this.value, this.colors);
-
+  _ProgressBarPainter(this.chewieController, this.value, this.colors);
+  final ChewieController chewieController;
   VideoPlayerValue value;
   ChewieProgressColors colors;
 
@@ -144,11 +152,14 @@ class _ProgressBarPainter extends CustomPainter {
     if (!value.initialized) {
       return;
     }
-    final double playedPartPercent =
-        value.position.inMilliseconds / value.duration.inMilliseconds;
+    int barDuration =
+        value.duration.inMilliseconds - chewieController.startPosition * 1000;
+    int barPosition =
+        value.position.inMilliseconds - chewieController.startPosition * 1000;
+    final double playedPartPercent = barPosition / barDuration;
     final double playedPart =
         playedPartPercent > 1 ? size.width : playedPartPercent * size.width;
-    for (DurationRange range in value.buffered) {
+    /*for (DurationRange range in value.buffered) {
       final double start = range.startFraction(value.duration) * size.width;
       final double end = range.endFraction(value.duration) * size.width;
       canvas.drawRRect(
@@ -161,7 +172,7 @@ class _ProgressBarPainter extends CustomPainter {
         ),
         colors.bufferedPaint,
       );
-    }
+    }*/
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromPoints(

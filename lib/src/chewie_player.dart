@@ -283,8 +283,7 @@ class ChewieController extends ChangeNotifier {
 
   static ChewieController of(BuildContext context) {
     final chewieControllerProvider =
-        context.inheritFromWidgetOfExactType(_ChewieControllerProvider)
-            as _ChewieControllerProvider;
+        context.dependOnInheritedWidgetOfExactType<_ChewieControllerProvider>();
 
     return chewieControllerProvider.controller;
   }
@@ -292,6 +291,11 @@ class ChewieController extends ChangeNotifier {
   bool _isFullScreen = false;
 
   bool get isFullScreen => _isFullScreen;
+
+  int _startPosition = 0;
+
+  int get startPosition => _startPosition;
+  set startPosition(int pos) => _startPosition = pos;
 
   Future _initialize() async {
     await videoPlayerController.setLooping(looping);
@@ -308,7 +312,6 @@ class ChewieController extends ChangeNotifier {
 
       await videoPlayerController.play();
     }
-
     if (startAt != null) {
       await videoPlayerController.seekTo(startAt);
     }

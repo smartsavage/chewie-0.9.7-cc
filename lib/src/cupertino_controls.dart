@@ -34,6 +34,7 @@ class _CupertinoControlsState extends State<CupertinoControls> {
   final marginSize = 5.0;
   Timer _expandCollapseTimer;
   Timer _initTimer;
+  bool first = true;
   String subtitle = "";
 
   VideoPlayerController controller;
@@ -48,7 +49,19 @@ class _CupertinoControlsState extends State<CupertinoControls> {
         subtitle = newSubtitle;
       }
     }
-
+    if (chewieController.isDVR && first) {
+      if (chewieController.startTime != null &&
+          _latestValue != null &&
+          _latestValue.metadata != null &&
+          _latestValue.metadata != "") {
+        try {
+          DateTime currentTime = DateTime.parse(_latestValue.metadata);
+          chewieController.startPosition = _latestValue.position.inSeconds -
+              currentTime.difference(chewieController.startTime).inSeconds;
+          first = false;
+        } catch (e) {}
+      }
+    }
     if (_latestValue.hasError) {
       return chewieController.errorBuilder != null
           ? chewieController.errorBuilder(
@@ -174,7 +187,6 @@ class _CupertinoControlsState extends State<CupertinoControls> {
                         _buildSkipForward(iconColor, barHeight),
                         _buildPosition(iconColor),
                         _buildProgressBar(),
-                        _buildRemaining(iconColor)
                       ],
                     ),
             ),
@@ -542,6 +554,7 @@ class _CupertinoControlsState extends State<CupertinoControls> {
       child: Padding(
         padding: EdgeInsets.only(right: 12.0),
         child: CupertinoVideoProgressBar(
+          chewieController,
           controller,
           onDragStart: () {
             _hideTimer?.cancel();

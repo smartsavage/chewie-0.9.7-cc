@@ -24,6 +24,7 @@ class _MaterialControlsState extends State<MaterialControls> {
   Timer _showTimer;
   Timer _showAfterExpandCollapseTimer;
   bool _dragging = false;
+  bool first = true;
   String subtitle = "";
 
   final barHeight = 48.0;
@@ -40,6 +41,20 @@ class _MaterialControlsState extends State<MaterialControls> {
         subtitle = newSubtitle;
       }
     }
+    if (chewieController.isDVR && first) {
+      if (chewieController.startTime != null &&
+          _latestValue != null &&
+          _latestValue.metadata != null &&
+          _latestValue.metadata != "") {
+        try {
+          DateTime currentTime = DateTime.parse(_latestValue.metadata);
+          chewieController.startPosition = _latestValue.position.inSeconds -
+              currentTime.difference(chewieController.startTime).inSeconds;
+          first = false;
+        } catch (e) {}
+      }
+    }
+
     if (_latestValue.hasError) {
       return chewieController.errorBuilder != null
           ? chewieController.errorBuilder(
@@ -429,6 +444,7 @@ class _MaterialControlsState extends State<MaterialControls> {
       child: Padding(
         padding: EdgeInsets.only(right: 20.0),
         child: MaterialVideoProgressBar(
+          chewieController,
           controller,
           onDragStart: () {
             setState(() {
