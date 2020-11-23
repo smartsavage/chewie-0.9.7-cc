@@ -53,7 +53,8 @@ class _CupertinoControlsState extends State<CupertinoControls> {
       if (chewieController.startTime != null &&
           _latestValue != null &&
           _latestValue.metadata != null &&
-          _latestValue.metadata != "") {
+          _latestValue.metadata != "" &&
+          _latestValue.position.inSeconds > 0) {
         try {
           DateTime currentTime = DateTime.parse(_latestValue.metadata);
           chewieController.startPosition = _latestValue.position.inSeconds -
